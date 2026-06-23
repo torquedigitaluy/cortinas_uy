@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,7 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createProduct, updateProduct, uploadProductImage } from "@/app/actions/products";
+import { createProduct, updateProduct, uploadProductImages } from "@/app/actions/products";
+import { ProductImageManager } from "@/components/admin/product-image-manager";
 import { slugify } from "@/lib/utils";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 import type { Category, ProductWithCategory, ProductWithDetails } from "@/lib/types";
@@ -42,7 +42,7 @@ export function ProductForm({
   const { toast } = useToast();
   const isEditing = Boolean(product);
   const [slugTouched, setSlugTouched] = useState(isEditing);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const pendingImageFiles = useRef<File[]>([]);
 
   const form = useForm<ProductInput>({
     resolver: zodResolver(productSchema),
@@ -74,13 +74,13 @@ export function ProductForm({
 
     const productId = isEditing ? product!.id : result.id;
 
-    if (imageFile && productId) {
+    if (!isEditing && pendingImageFiles.current.length > 0 && productId) {
       const formData = new FormData();
-      formData.append("file", imageFile);
-      const imageResult = await uploadProductImage(productId, formData);
+      pendingImageFiles.current.forEach((file) => formData.append("files", file));
+      const imageResult = await uploadProductImages(productId, formData);
       if (!imageResult.success) {
         toast({
-          title: "Producto guardado, pero la imagen falló",
+          title: "Producto guardado, pero las imágenes fallaron",
           description: imageResult.error,
           variant: "destructive",
         });
@@ -215,16 +215,11 @@ export function ProductForm({
           )}
         />
 
-        <div>
-          <Label htmlFor="product-image">Imagen principal</Label>
-          <Input
-            id="product-image"
-            type="file"
-            accept="image/*"
-            className="mt-2"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-          />
-        </div>
+        <ProductImageManager
+          productId={isEditing ? product!.id : null}
+          initialImages={product?.product_images ?? []}
+          pendingFilesRef={pendingImageFiles}
+        />
 
         <FormField
           control={form.control}

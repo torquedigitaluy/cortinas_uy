@@ -72,48 +72,95 @@ export async function deleteProduct(id: string) {
   return { success: true as const };
 }
 
-export async function uploadProductImage(productId: string, formData: FormData) {
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { success: false as const, error: "Elegí una imagen." };
+export async function uploadProductImages(productId: string, formData: FormData) {
+  const files = formData
+    .getAll("files")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+
+  if (files.length === 0) {
+    return { success: false as const, error: "Elegí al menos una imagen." };
   }
 
   const supabase = createClient();
 
-  const { data: existingImages } = await supabase
+  const { data: lastImage } = await supabase
     .from("product_images")
-    .select("id, storage_path")
-    .eq("product_id", productId);
+    .select("sort_order")
+    .eq("product_id", productId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (existingImages && existingImages.length > 0) {
-    await supabase.storage
+  let nextSortOrder = (lastImage?.sort_order ?? -1) + 1;
+
+  for (const file of files) {
+    const extension = file.name.split(".").pop() ?? "jpg";
+    const path = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
       .from("product-images")
-      .remove(existingImages.map((image) => image.storage_path));
-    await supabase
-      .from("product_images")
-      .delete()
-      .eq("product_id", productId);
+      .upload(path, file, { contentType: file.type });
+
+    if (uploadError) {
+      return { success: false as const, error: "No pudimos subir una de las imágenes." };
+    }
+
+    const { error: insertError } = await supabase.from("product_images").insert({
+      product_id: productId,
+      storage_path: path,
+      sort_order: nextSortOrder,
+    });
+
+    if (insertError) {
+      return { success: false as const, error: "No pudimos guardar una de las imágenes." };
+    }
+
+    nextSortOrder += 1;
   }
 
-  const extension = file.name.split(".").pop() ?? "jpg";
-  const path = `${productId}/${Date.now()}.${extension}`;
+  revalidateProductPaths();
+  return { success: true as const };
+}
 
-  const { error: uploadError } = await supabase.storage
-    .from("product-images")
-    .upload(path, file, { contentType: file.type });
+export async function deleteProductImage(imageId: string) {
+  const supabase = createClient();
 
-  if (uploadError) {
-    return { success: false as const, error: "No pudimos subir la imagen." };
+  const { data: image } = await supabase
+    .from("product_images")
+    .select("storage_path")
+    .eq("id", imageId)
+    .maybeSingle();
+
+  if (!image) {
+    return { success: false as const, error: "Imagen no encontrada." };
   }
 
-  const { error: insertError } = await supabase.from("product_images").insert({
-    product_id: productId,
-    storage_path: path,
-    sort_order: 0,
-  });
+  await supabase.storage.from("product-images").remove([image.storage_path]);
 
-  if (insertError) {
-    return { success: false as const, error: "No pudimos guardar la imagen." };
+  const { error } = await supabase.from("product_images").delete().eq("id", imageId);
+  if (error) {
+    return { success: false as const, error: "No pudimos eliminar la imagen." };
+  }
+
+  revalidateProductPaths();
+  return { success: true as const };
+}
+
+export async function reorderProductImages(productId: string, orderedImageIds: string[]) {
+  const supabase = createClient();
+
+  const results = await Promise.all(
+    orderedImageIds.map((id, index) =>
+      supabase
+        .from("product_images")
+        .update({ sort_order: index })
+        .eq("id", id)
+        .eq("product_id", productId),
+    ),
+  );
+
+  if (results.some((result) => result.error)) {
+    return { success: false as const, error: "No pudimos reordenar las imágenes." };
   }
 
   revalidateProductPaths();
