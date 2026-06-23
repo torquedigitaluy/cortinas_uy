@@ -67,6 +67,35 @@ export async function getProductsByCategory(
   return data as unknown as ProductCardData[];
 }
 
+export async function getAllProductsForAdmin(): Promise<ProductListItem[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(`${PRODUCT_CARD_SELECT}, categories(id, slug, name)`)
+    .order("sort_order", { foreignTable: "product_images" })
+    .order("name", { ascending: true });
+
+  if (error) throw error;
+  return data as unknown as ProductListItem[];
+}
+
+export async function getProductByIdForAdmin(
+  id: string,
+): Promise<(ProductWithCategory & ProductWithDetails) | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(
+      "*, categories(id, slug, name), product_variants(*), product_images(*)",
+    )
+    .eq("id", id)
+    .order("sort_order", { foreignTable: "product_images" })
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as unknown as ProductWithCategory & ProductWithDetails;
+}
+
 export async function getProductBySlug(
   slug: string,
 ): Promise<(ProductWithCategory & ProductWithDetails) | null> {

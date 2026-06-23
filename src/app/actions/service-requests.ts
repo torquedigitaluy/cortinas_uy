@@ -1,6 +1,9 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
+import type { ServiceRequest } from "@/lib/types";
 import {
   serviceRequestSchema,
   type ServiceRequestInput,
@@ -25,5 +28,23 @@ export async function createServiceRequest(input: ServiceRequestInput) {
     return { success: false as const, error: "No pudimos enviar tu solicitud. Probá de nuevo." };
   }
 
+  return { success: true as const };
+}
+
+export async function updateServiceRequestStatus(
+  id: string,
+  status: ServiceRequest["status"],
+) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("service_requests")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    return { success: false as const, error: "No pudimos actualizar el estado." };
+  }
+
+  revalidatePath("/admin/leads");
   return { success: true as const };
 }

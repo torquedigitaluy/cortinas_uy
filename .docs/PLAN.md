@@ -20,7 +20,7 @@ Estado de avance: actualizar la casilla de cada etapa a medida que se completa.
 - [x] Etapa 2 — Sistema de diseño y layout compartido
 - [x] Etapa 3 — Catálogo público
 - [x] Etapa 4 — Embudo de leads
-- [ ] Etapa 5 — Auth admin + dashboard
+- [x] Etapa 5 — Auth admin + dashboard
 - [ ] Etapa 6 — Membresía + Mercado Pago
 - [ ] Etapa 7 — Alianza RE/MAX
 - [ ] Etapa 8 — Pulido final

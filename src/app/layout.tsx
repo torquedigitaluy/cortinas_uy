@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { WhatsappButton } from "@/components/layout/whatsapp-button";
 import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
@@ -47,10 +44,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <WhatsappButton />
+        {children}
         <Toaster />
       </body>
     </html>

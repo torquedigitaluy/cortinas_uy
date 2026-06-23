@@ -89,7 +89,7 @@ export type Database = {
           {
             foreignKeyName: "products_category_id_fkey";
             columns: ["category_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "categories";
             referencedColumns: ["id"];
           },
@@ -127,7 +127,7 @@ export type Database = {
           {
             foreignKeyName: "product_variants_product_id_fkey";
             columns: ["product_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "products";
             referencedColumns: ["id"];
           },
@@ -162,7 +162,7 @@ export type Database = {
           {
             foreignKeyName: "product_images_product_id_fkey";
             columns: ["product_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "products";
             referencedColumns: ["id"];
           },
@@ -254,14 +254,14 @@ export type Database = {
           {
             foreignKeyName: "service_requests_product_category_id_fkey";
             columns: ["product_category_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "categories";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "service_requests_remax_agent_id_fkey";
             columns: ["remax_agent_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "remax_agents";
             referencedColumns: ["id"];
           },
@@ -368,7 +368,7 @@ export type Database = {
           {
             foreignKeyName: "membership_payments_membership_id_fkey";
             columns: ["membership_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "memberships";
             referencedColumns: ["id"];
           },

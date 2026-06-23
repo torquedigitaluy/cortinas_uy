@@ -1,10 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import type { Database } from "@/lib/supabase/database.types";
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -26,7 +28,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refreshes the auth token if expired — required to keep Server Components in sync.
-  await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return { supabaseResponse, user: data.user };
 }
