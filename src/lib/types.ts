@@ -18,6 +18,16 @@ export type ProductWithCategory = Product & {
   categories: Pick<Category, "id" | "slug" | "name">;
 };
 
+type ProductImagePreview = Pick<ProductImage, "storage_path" | "alt_text">;
+
+export type ProductCardData = Product & {
+  product_images: ProductImagePreview[];
+};
+
+export type ProductListItem = ProductCardData & {
+  categories: Pick<Category, "id" | "slug" | "name">;
+};
+
 export type ProductWithDetails = Product & {
   product_variants: ProductVariant[];
   product_images: ProductImage[];
