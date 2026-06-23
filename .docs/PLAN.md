@@ -17,7 +17,7 @@ Estado de avance: actualizar la casilla de cada etapa a medida que se completa.
 
 - [x] Etapa 0 — Fundación de proyecto
 - [x] Etapa 1 — Modelado de base de datos en Supabase
-- [ ] Etapa 2 — Sistema de diseño y layout compartido
+- [x] Etapa 2 — Sistema de diseño y layout compartido
 - [ ] Etapa 3 — Catálogo público
 - [ ] Etapa 4 — Embudo de leads
 - [ ] Etapa 5 — Auth admin + dashboard
