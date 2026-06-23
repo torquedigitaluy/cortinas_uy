@@ -1,17 +1,18 @@
 -- Etapa 1: datos ficticios para poder maquetar y probar el catálogo, leads y RE/MAX.
--- El contenido real se carga después vía el panel admin (Etapa 5). Las imágenes son
--- placeholders (storage_path apunta a 'placeholder/...') que el componente de producto
--- resuelve a una imagen de stock genérica hasta que se suba contenido real al bucket.
+-- El contenido real se carga después vía el panel admin (Etapa 5). Las imágenes de
+-- producto usan storage_path con prefijo 'local/' (Etapa 8: fotos de stock de Unsplash
+-- guardadas en public/images/) hasta que se suba contenido real al bucket; ver
+-- src/lib/supabase/storage.ts para la resolución de URLs.
 
 -- ===================== CATEGORÍAS =====================
 
-insert into public.categories (slug, name, description, sort_order) values
-  ('cortinas-enrollar', 'Cortinas de Enrollar', 'Cortinas de enrollar tradicionales y sin albañilería.', 1),
-  ('cortinas-interiores', 'Cortinas Interiores', 'Roller, venecianas y bandas verticales.', 2),
-  ('puertas-plegables', 'Puertas Plegables', 'Puertas plegables en PVC y aluminio.', 3),
-  ('mamparas-bano', 'Mamparas de Baño', 'Mamparas corredizas y fijas para baño.', 4),
-  ('automatismos', 'Automatismos', 'Motorización y control remoto para cortinas.', 5),
-  ('accesorios', 'Accesorios', 'Repuestos y accesorios para cortinas y cerramientos.', 6);
+insert into public.categories (slug, name, description, image_url, sort_order) values
+  ('cortinas-enrollar', 'Cortinas de Enrollar', 'Cortinas de enrollar tradicionales y sin albañilería.', '/images/categories/cortinas-enrollar.jpg', 1),
+  ('cortinas-interiores', 'Cortinas Interiores', 'Roller, venecianas y bandas verticales.', '/images/categories/cortinas-interiores.jpg', 2),
+  ('puertas-plegables', 'Puertas Plegables', 'Puertas plegables en PVC y aluminio.', '/images/categories/puertas-plegables.jpg', 3),
+  ('mamparas-bano', 'Mamparas de Baño', 'Mamparas corredizas y fijas para baño.', '/images/categories/mamparas-bano.jpg', 4),
+  ('automatismos', 'Automatismos', 'Motorización y control remoto para cortinas.', '/images/categories/automatismos.jpg', 5),
+  ('accesorios', 'Accesorios', 'Repuestos y accesorios para cortinas y cerramientos.', '/images/categories/accesorios.jpg', 6);
 
 -- ===================== PRODUCTOS: cortinas-enrollar =====================
 
@@ -201,10 +202,10 @@ select id, '1 canal', 1800, true from public.products where slug = 'control-remo
 insert into public.product_variants (product_id, name, price)
 select id, '4 canales', 2600 from public.products where slug = 'control-remoto-universal';
 
--- ===================== IMÁGENES (placeholder) =====================
+-- ===================== IMÁGENES (stock de Unsplash) =====================
 
 insert into public.product_images (product_id, storage_path, alt_text, sort_order)
-select id, 'placeholder/' || slug || '-01.jpg', name, 1 from public.products;
+select id, 'local/products/' || slug || '-01.jpg', name, 1 from public.products;
 
 -- ===================== AGENTES RE/MAX =====================
 
